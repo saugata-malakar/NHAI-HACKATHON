@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceAuth Offline — Secure edge AI Dashboard</title>
+  <!-- Google Fonts & Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Premium Header Panel -->
+  <header>
+    <div class="logo-container">
+      <span class="logo-icon">🔐</span>
+      <div>
+        <h1>FaceAuth Offline</h1>
+        <span class="subtitle">Secure Edge Biometrics & Chained Ledger</span>
+      </div>
+    </div>
+    <div class="status-pill">
+      <div id="sync-indicator" class="status-dot"></div>
+      <span style="color: var(--text-main); font-family: monospace;">Network: ONLINE</span>
+    </div>
+  </header>
+
+  <!-- Core Dashboard Layout -->
+  <main>
+    
+    <!-- Left Column: Camera and Control Panel -->
+    <section class="tab-container">
+      
+      <!-- Persistent Biometric Viewport Card -->
+      <div class="glass-panel">
+        <h2 class="section-title">👤 Biometric Viewport</h2>
+        <div class="camera-box" style="margin-top: 14px;">
+          <video id="camera-stream" autoplay playsinline muted></video>
+          <div class="face-overlay">
+            <div class="face-guide"></div>
+          </div>
+        </div>
+        
+        <div class="challenge-banner">
+          <span class="challenge-text" id="challenge-text">👁  Blink your eyes</span>
+          <div class="dots-row">
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; text-align: center;">Simulate Face Liveness Events:</span>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+            <button class="btn btn-secondary" onclick="triggerAction('blink')">👁 Blink</button>
+            <button class="btn btn-secondary" onclick="triggerAction('smile')">😊 Smile</button>
+            <button class="btn btn-secondary" onclick="triggerAction('turn_left')">⬅️ Left</button>
+            <button class="btn btn-secondary" onclick="triggerAction('turn_right')">➡️ Right</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biometric Control Panel (Unified switcher & panels card) -->
+      <div class="glass-panel">
+        <div class="tabs-nav">
+          <button class="biometric-tab-btn tab-btn active" data-tab="authenticate" onclick="showBiometricTab('authenticate')">🎯 Authenticate</button>
+          <button class="biometric-tab-btn tab-btn" data-tab="enroll" onclick="showBiometricTab('enroll')">➕ Enroll Face</button>
+        </div>
+        
+        <hr style="border: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin: 16px 0 12px 0;">
+
+        <!-- Authenticate Mode Panel -->
+        <div id="biometric-authenticate" class="biometric-tab-content tab-content active">
+          <h2 class="section-title">🎯 Biometric Authentication</h2>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+            The system will automatically scan your face and match it against the local gallery when active liveness challenges are completed.
+          </p>
+        </div>
+
+        <!-- Enrollment Mode Panel -->
+        <div id="biometric-enroll" class="biometric-tab-content tab-content">
+          <h2 class="section-title">➕ Enroll Face</h2>
+          <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-group">
+              <label for="enroll-id">User / Employee ID</label>
+              <input type="text" id="enroll-id" class="form-control" placeholder="EE-2026-Saha" value="UID-4912">
+            </div>
+            <div class="form-group">
+              <label for="enroll-name">Full Name</label>
+              <input type="text" id="enroll-name" class="form-control" placeholder="Trinakshi Saha" value="Trinakshi Saha">
+            </div>
+            <div class="form-group">
+              <label for="enroll-dept">Department</label>
+              <input type="text" id="enroll-dept" class="form-control" placeholder="Electrical Engineering" value="Electrical Engineering">
+            </div>
+
+            <button class="btn" style="margin-top: 6px;" onclick="startEnrollmentRegistration()">✨ Start Liveness & Register</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Developer Console, Database & Telemetry -->
+    <section class="console-section">
+      
+      <!-- Telemetry Dashboard Panel -->
+      <div class="glass-panel">
+        <h2 class="section-title">📊 Edge ML Telemetry</h2>
+        <div class="telemetry-deck" style="margin-top: 14px;">
+          <div class="telemetry-card">
+            <span class="telemetry-val" id="stat-det">3.2ms</span>
+            <span class="telemetry-lbl">BlazeFace Det</span>
+          </div>
+          <div class="telemetry-card">
+            <span class="telemetry-val" id="stat-mesh">18.1ms</span>
+            <span class="telemetry-lbl">FaceMesh</span>
+          </div>
+          <div class="telemetry-card">
+            <span class="telemetry-val" id="stat-fas">7.8ms</span>
+            <span class="telemetry-lbl">MiniFAS AntiSpoof</span>
+          </div>
+          <div class="telemetry-card" style="grid-column: span 1;">
+            <span class="telemetry-val" id="stat-rec">34.5ms</span>
+            <span class="telemetry-lbl">Face Embedding</span>
+          </div>
+          <div class="telemetry-card" style="grid-column: span 2; border-color: rgba(69, 243, 255, 0.2);">
+            <span class="telemetry-val" id="stat-total" style="color: var(--color-primary);">63.6ms</span>
+            <span class="telemetry-lbl" style="color: var(--color-primary);">Total Inference</span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-around; background-color: rgba(14, 22, 34, 0.4); border-radius: 8px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.02);">
+          <div style="text-align: center;">
+            <div id="stat-enrolled" style="font-weight: 800; font-size: 16px; color: var(--color-primary);">0</div>
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Enrolled</div>
+          </div>
+          <div style="text-align: center;">
+            <div id="stat-pending" style="font-weight: 800; font-size: 16px; color: var(--color-warning);">0</div>
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Pending Sync</div>
+          </div>
+          <div style="text-align: center;">
+            <div id="stat-logs" style="font-weight: 800; font-size: 16px; color: var(--color-accent);">0</div>
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Logs Queue</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation for console view -->
+      <div class="glass-panel" style="padding: 18px;">
+        <div class="tabs-nav">
+          <button class="console-tab-btn tab-btn active" data-tab="ledger" onclick="showConsoleTab('ledger')">🗄️ SQL Chained Ledger</button>
+          <button class="console-tab-btn tab-btn" data-tab="sync" onclick="showConsoleTab('sync')">☁️ Tamper Lab & Sync</button>
+        </div>
+      </div>
+
+      <!-- Tab DB Console Content -->
+      <div id="console-ledger" class="console-tab-content tab-content active glass-panel" style="flex: 1;">
+        <div class="console-header">
+          <h2 class="section-title">🗄️ Local Sandboxed Database</h2>
+          <span class="badge">SQLite + AES-256</span>
+        </div>
+        
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>UID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Similarity</th>
+                <th>Log Hash</th>
+                <th>Prev Hash</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Sync Settings & Tampering lab -->
+      <div id="console-sync" class="console-tab-content tab-content glass-panel" style="flex: 1;">
+        <div class="console-header">
+          <h2 class="section-title">🔬 Cryptographic Tampering Lab</h2>
+          <span class="badge offline">Dev Mode</span>
+        </div>
+        
+        <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 12px;">
+          <div class="form-group" style="flex-direction: row; justify-content: space-between; align-items: center;">
+            <div>
+              <label style="font-size: 13px; color: #FFF; font-weight: 600;">Simulated Connectivity Status</label>
+              <div style="font-size: 10px; color: var(--text-muted);">Toggle network access to test sync failures</div>
+            </div>
+            <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 22px;">
+              <input type="checkbox" id="network-toggle" checked style="opacity: 0; width: 0; height: 0;">
+              <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--color-secondary); transition: .4s; border-radius: 34px;"></span>
+            </label>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px;">
+            <button class="btn btn-error" style="font-size: 11px;" onclick="triggerLedgerTampering()">⚠️ Alter Log</button>
+            <button class="btn btn-error" style="font-size: 11px;" onclick="triggerLedgerDeletion()">⚠️ Delete Chain</button>
+            <button class="btn" style="font-size: 11px; background-color: var(--color-primary); color: #080C10;" onclick="restoreLedgerWeb()">✅ Restore</button>
+          </div>
+
+          <hr style="border: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin: 8px 0;">
+
+          <h3 style="font-size: 13px; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.5px;">Cloud Sync (KMS + DynamoDB Table)</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            <div class="form-group">
+              <label>S3 Bucket</label>
+              <input type="text" class="form-control" value="datalake-faceauth-bucket" readonly>
+            </div>
+            <div class="form-group">
+              <label>KMS Key ID</label>
+              <input type="text" class="form-control" value="arn:aws:kms:ap-south-1" readonly>
+            </div>
+          </div>
+
+          <button class="btn" style="background-color: var(--color-secondary); color: #080C10;" onclick="doSimulatedSync()">☁️ Sync Now & Purge Local</button>
+        </div>
+      </div>
+
+      <!-- Real-Time Log terminal output monitor -->
+      <div class="glass-panel" style="padding: 16px;">
+        <h2 class="section-title" style="font-size: 14px;">📟 Edge Execution Terminal</h2>
+        <div class="terminal-screen" id="terminal-log" style="margin-top: 10px;">
+          <!-- Dynamically populated log lines -->
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+  <!-- Simple Toggle Slider styling -->
+  <style>
+    input:checked + .slider {
+      background-color: var(--color-secondary) !important;
+    }
+    input:not(:checked) + .slider {
+      background-color: var(--color-error) !important;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+  </style>
+</body>
+</html>

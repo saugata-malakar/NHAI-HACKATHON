@@ -1,0 +1,64 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+
+android {
+    namespace "com.faceauthoffline"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    
+    defaultConfig {
+        applicationId "com.faceauthoffline"
+        minSdkVersion 26   // Android 8.0+
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0.0"
+        
+        // Enable TFLite GPU delegate
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            // Keep TFLite classes
+            proguardFiles += 'proguard-tflite.pro'
+        }
+        debug {
+            jniDebuggable true
+        }
+    }
+
+    // Required for TFLite: prevents stripping of .tflite assets
+    aaptOptions {
+        noCompress "tflite", "lite"
+    }
+    
+    // Required for react-native-fast-tflite GPU delegate
+    packagingOptions {
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    }
+}
+
+dependencies {
+    // React Native
+    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:hermes-android")
+    
+    // TFLite with GPU delegate
+    implementation 'org.tensorflow:tensorflow-lite:2.14.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.14.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.4'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.4.4'
+    
+    // SQLite (op-sqlite)
+    implementation project(':op-sqlite')
+    
+    // Camera (vision-camera)
+    implementation project(':react-native-vision-camera')
+}
